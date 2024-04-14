@@ -1,28 +1,9 @@
-/*
-*******************************************************************************
-* Copyright (c) 2023 by M5Stack
-*                  Equipped with M5Core sample source code
-*                          配套  M5Core 示例源代码
-* Visit for more information: https://docs.m5stack.com/en/unit/gps
-* 获取更多资料请访问: https://docs.m5stack.com/zh_CN/unit/gps
-*
-* Describe: GPS.
-* Date: 2021/8/26
-*******************************************************************************
-  Connect UNIT GPS to port C, Use GPS Unit to get the coordinate data and time
-of the current location. 将UNIT GPS
-连接到C端口,使用GPS单元获取当前位置的坐标数据和时间。
-*/
-
 #include <M5CoreS3.h>
 #include <TinyGPSPlus.h>
 
 static const uint32_t GPSBaud = 9600;
 
-// Creat The TinyGPS++ object.  创建GPS实例
 TinyGPSPlus gps;
-
-// The serial connection to the GPS device.  与GPS设备的串行连接
 HardwareSerial ss(2);
 
 void setup() {
@@ -86,7 +67,6 @@ void loop() {
 }
 
 // This custom version of delay() ensures that GPS objects work properly.
-// 这个自定义版本的delay()确保gps对象正常工作。
 static void smartDelay(unsigned long ms) {
     unsigned long start = millis();
     do {

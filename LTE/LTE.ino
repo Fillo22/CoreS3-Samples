@@ -1,24 +1,22 @@
 #include "M5CoreS3.h"
-#define TINY_GSM_MODEM_SIM7600
-// Include le librerie necessarie per la comunicazione cellulare e MQTT
+#define TINY_GSM_MODEM_SIM7600 // Use SIM7600 modem
 #include <TinyGsmClient.h>
 #include <PubSubClient.h>
 
-// Dati per la connessione cellulare
-const char apn[] = "TM"; // Sostituisci con il tuo APN
-const char gprsUser[] = ""; // Sostituisci con il tuo user, se necessario
-const char gprsPass[] = ""; // Sostituisci con la tua password, se necessario
+// Cellular network information
+const char apn[] = "TM"; // APN of your network provider
+const char gprsUser[] = ""; // If required
+const char gprsPass[] = ""; // If required
 
-// Dati server MQTT
+// MQTT Broker
 const char* mqttServer = "broker.hivemq.com";
 const int mqttPort = 1883;
-const char* mqttUser = ""; // Se necessario
-const char* mqttPassword = ""; // Se necessario
+const char* mqttUser = ""; // If required
+const char* mqttPassword = ""; // If required
 
-// PIN per la SIM card
+// SIM Card PIN (leave empty, if not defined)
 const char simPIN[] = ""; 
 
-// Inizializza l'oggetto modem e client
 TinyGsm modem(Serial2);
 TinyGsmClient gsmClient(modem);
 PubSubClient mqttClient(gsmClient);
@@ -27,12 +25,12 @@ void setup() {
   auto cfg = M5.config();
   CoreS3.begin(cfg);
   CoreS3.Display.setTextSize(2);
-  Serial2.begin(115200, SERIAL_8N1, 18, 17); // Configura la seriale per il modulo SIM7600G
+  Serial2.begin(115200, SERIAL_8N1, 18, 17); // Set serial port for modem communication
 
-  // Avvia il modem e stabilisci la connessione GPRS
+  // Start modem and connect to network
   setupModem();
 
-  // Connessione al server MQTT
+  // Connect to MQTT Broker
   mqttClient.setServer(mqttServer, mqttPort);
   connectMQTT();
 }
@@ -43,31 +41,31 @@ void loop() {
   }
   mqttClient.loop();
 
-  // Costruisci il tuo messaggio JSON qui
+  // Create a JSON message
   String message = "{\"temperature\":24,\"humidity\":60}";
   
-  // Pubblica il messaggio JSON
+  // Publish the message
   if(mqttClient.publish("sensordata/topic", message.c_str())) {
     CoreS3.Display.println("Messaggio inviato");
   } else {
     CoreS3.Display.println("Errore nell'invio del messaggio");
   }
 
-  delay(1000); // Attendere un secondo tra i messaggi
+  delay(1000); // Wait between messages
 }
 
 void setupModem() {
-  // Resetta e inizializza il modem
+  // RESET the modem
   modem.restart();
   CoreS3.Display.println("Configurazione modem...");
 
-  // Imposta il PIN della SIM, se necessario
+  // Set SIM card PIN if necessary
   if (strlen(simPIN) && !modem.simUnlock(simPIN)) {
     CoreS3.Display.println("Impossibile sbloccare la SIM");
     return;
   }
 
-  // Connetti alla rete cellulare
+  // Connect to the network
   if (!modem.gprsConnect(apn, gprsUser, gprsPass)) {
     CoreS3.Display.println("Connessione GPRS fallita");
     return;
@@ -77,7 +75,7 @@ void setupModem() {
 }
 
 void connectMQTT() {
-  // Connettiti al server MQTT
+  // Connect to MQTT Broker
   CoreS3.Display.println("Connessione a MQTT...");
 
   while (!mqttClient.connected()) {
